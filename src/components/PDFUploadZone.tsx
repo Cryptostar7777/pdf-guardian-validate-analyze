@@ -4,7 +4,7 @@ import { Upload, FileText, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import { PDFValidator } from '@/utils/pdfValidator';
+import { PdfAnalyzer } from '@/utils/pdfAnalyzer';
 import type { PdfValidationResult, PdfAnalysisProgress } from '@/types/pdf';
 
 interface PDFUploadZoneProps {
@@ -55,7 +55,7 @@ export const PDFUploadZone: React.FC<PDFUploadZoneProps> = ({
       // Add some delay to show progress
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const result = await PDFValidator.validateFile(file);
+      const result = await PdfAnalyzer.validatePdfFile(file);
       
       // Ensure progress reaches 100%
       setValidationProgress(100);
