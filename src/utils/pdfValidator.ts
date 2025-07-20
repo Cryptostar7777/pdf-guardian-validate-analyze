@@ -1,5 +1,5 @@
 import * as pdfjsLib from 'pdfjs-dist';
-import type { PDFValidationResult, PDFAnalysis } from '@/types/pdf';
+import type { PdfValidationResult, PdfFileInfo } from '@/types/pdf';
 
 // Configure PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
@@ -8,79 +8,102 @@ const MAX_PAGES = 250;
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 export class PDFValidator {
-  static async validateFile(file: File): Promise<PDFValidationResult> {
-    const result: PDFValidationResult = {
-      isValid: false,
-      pageCount: 0,
-      fileSize: file.size,
-      fileName: file.name,
-      pdfType: 'unknown',
-      estimatedProcessingTime: 0,
-      complexity: 'low'
+  static async validateFile(file: File): Promise<PdfValidationResult> {
+    const fileInfo: PdfFileInfo = {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      lastModified: file.lastModified
     };
+
+    const errors: string[] = [];
 
     try {
       // Check file type
       if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-        result.error = 'Файл должен быть в формате PDF';
-        return result;
+        errors.push('Файл должен быть в формате PDF');
+        return {
+          isValid: false,
+          fileInfo,
+          pdfType: 'unknown',
+          complexity: 'low',
+          estimatedProcessingTime: 0,
+          errors,
+          warnings: []
+        };
       }
 
       // Check file size
       if (file.size > MAX_FILE_SIZE) {
-        result.error = `Размер файла не должен превышать ${MAX_FILE_SIZE / 1024 / 1024}MB`;
-        return result;
+        errors.push(`Размер файла не должен превышать ${MAX_FILE_SIZE / 1024 / 1024}MB`);
+        return {
+          isValid: false,
+          fileInfo,
+          pdfType: 'unknown',
+          complexity: 'low',
+          estimatedProcessingTime: 0,
+          errors,
+          warnings: []
+        };
       }
 
       // Load PDF document
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       
-      result.pageCount = pdf.numPages;
+      fileInfo.pageCount = pdf.numPages;
 
       // Check page limit
-      if (result.pageCount > MAX_PAGES) {
-        result.error = `Документ содержит ${result.pageCount} страниц. Максимально допустимо ${MAX_PAGES} страниц.`;
-        return result;
+      if (fileInfo.pageCount > MAX_PAGES) {
+        errors.push(`Документ содержит ${fileInfo.pageCount} страниц. Максимально допустимо ${MAX_PAGES} страниц.`);
+        return {
+          isValid: false,
+          fileInfo,
+          pdfType: 'unknown',
+          complexity: 'low',
+          estimatedProcessingTime: 0,
+          errors,
+          warnings: []
+        };
       }
 
       // Analyze PDF content
       const analysis = await this.analyzePDFContent(pdf);
-      result.pdfType = this.determinePDFType(analysis);
-      result.complexity = this.calculateComplexity(result.pageCount, analysis);
-      result.estimatedProcessingTime = this.estimateProcessingTime(result.pageCount, result.complexity);
+      const pdfType = this.determinePDFType(analysis);
+      const complexity = this.calculateComplexity(fileInfo.pageCount, analysis);
+      const estimatedProcessingTime = this.estimateProcessingTime(fileInfo.pageCount, complexity);
       
-      result.isValid = true;
+      return {
+        isValid: true,
+        fileInfo,
+        pdfType,
+        complexity,
+        estimatedProcessingTime,
+        errors: [],
+        warnings: []
+      };
       
     } catch (error) {
-      result.error = error instanceof Error ? error.message : 'Ошибка при анализе PDF файла';
+      errors.push(error instanceof Error ? error.message : 'Ошибка при анализе PDF файла');
+      return {
+        isValid: false,
+        fileInfo,
+        pdfType: 'unknown',
+        complexity: 'low',
+        estimatedProcessingTime: 0,
+        errors,
+        warnings: []
+      };
     }
-
-    return result;
   }
 
-  private static async analyzePDFContent(pdf: any): Promise<PDFAnalysis> {
-    const analysis: PDFAnalysis = {
+  private static async analyzePDFContent(pdf: any): Promise<{ hasText: boolean; hasImages: boolean }> {
+    const analysis = {
       hasText: false,
-      hasImages: false,
-      metadata: {}
+      hasImages: false
     };
 
     try {
-      // Get metadata
-      const metadata = await pdf.getMetadata();
-      if (metadata.info) {
-        analysis.metadata = {
-          title: metadata.info.Title,
-          author: metadata.info.Author,
-          subject: metadata.info.Subject,
-          creator: metadata.info.Creator,
-          producer: metadata.info.Producer,
-          creationDate: metadata.info.CreationDate,
-          modificationDate: metadata.info.ModDate
-        };
-      }
-
       // Sample first few pages to determine content type
       const samplesToCheck = Math.min(5, pdf.numPages);
       
@@ -117,7 +140,7 @@ export class PDFValidator {
     return analysis;
   }
 
-  private static determinePDFType(analysis: PDFAnalysis): 'text' | 'scanned' | 'mixed' | 'unknown' {
+  private static determinePDFType(analysis: { hasText: boolean; hasImages: boolean }): 'text' | 'scanned' | 'mixed' | 'unknown' {
     if (analysis.hasText && analysis.hasImages) {
       return 'mixed';
     } else if (analysis.hasText) {
@@ -128,7 +151,7 @@ export class PDFValidator {
     return 'unknown';
   }
 
-  private static calculateComplexity(pageCount: number, analysis: PDFAnalysis): 'low' | 'medium' | 'high' {
+  private static calculateComplexity(pageCount: number, analysis: { hasText: boolean; hasImages: boolean }): 'low' | 'medium' | 'high' {
     let score = 0;
     
     // Page count factor

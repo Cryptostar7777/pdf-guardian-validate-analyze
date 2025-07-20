@@ -5,10 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
-import type { PDFValidationResult } from '@/types/pdf';
+import type { PdfValidationResult } from '@/types/pdf';
 
 interface PDFValidationResultProps {
-  result: PDFValidationResult;
+  result: PdfValidationResult;
   className?: string;
 }
 
@@ -81,18 +81,18 @@ export const PDFValidationResultComponent: React.FC<PDFValidationResultProps> = 
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              {result.error || 'Произошла неизвестная ошибка при валидации файла'}
+              {result.errors[0] || 'Произошла неизвестная ошибка при валидации файла'}
             </AlertDescription>
           </Alert>
           
           <div className="mt-4 space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Имя файла:</span>
-              <span className="font-medium">{result.fileName}</span>
+              <span className="font-medium">{result.fileInfo.name}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Размер файла:</span>
-              <span className="font-medium">{formatFileSize(result.fileSize)}</span>
+              <span className="font-medium">{formatFileSize(result.fileInfo.size)}</span>
             </div>
           </div>
         </CardContent>
@@ -123,9 +123,9 @@ export const PDFValidationResultComponent: React.FC<PDFValidationResultProps> = 
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
               <FileText className="w-4 h-4 text-muted-foreground" />
               <div>
-                <div className="font-medium text-sm">{result.fileName}</div>
+                <div className="font-medium text-sm">{result.fileInfo.name}</div>
                 <div className="text-xs text-muted-foreground">
-                  {formatFileSize(result.fileSize)}
+                  {formatFileSize(result.fileInfo.size)}
                 </div>
               </div>
             </div>
@@ -135,7 +135,7 @@ export const PDFValidationResultComponent: React.FC<PDFValidationResultProps> = 
                 <span className="text-xs font-bold text-muted-foreground">#</span>
               </div>
               <div>
-                <div className="font-medium text-sm">{result.pageCount} страниц</div>
+                <div className="font-medium text-sm">{result.fileInfo.pageCount} страниц</div>
                 <div className="text-xs text-muted-foreground">
                   в документе
                 </div>

@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { PDFValidator } from '@/utils/pdfValidator';
-import type { PDFValidationResult, UploadProgress } from '@/types/pdf';
+import type { PdfValidationResult, PdfAnalysisProgress } from '@/types/pdf';
 
 interface PDFUploadZoneProps {
-  onFileValidated: (result: PDFValidationResult) => void;
-  onUploadProgress?: (progress: UploadProgress) => void;
+  onFileValidated: (result: PdfValidationResult) => void;
+  onUploadProgress?: (progress: { loaded: number; total: number; percentage: number }) => void;
   className?: string;
 }
 
@@ -77,13 +77,17 @@ export const PDFUploadZone: React.FC<PDFUploadZoneProps> = ({
       
       onFileValidated({
         isValid: false,
-        pageCount: 0,
-        fileSize: file.size,
-        fileName: file.name,
+        fileInfo: {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          lastModified: file.lastModified
+        },
         pdfType: 'unknown',
         estimatedProcessingTime: 0,
         complexity: 'low',
-        error: 'Произошла ошибка при валидации файла'
+        errors: ['Произошла ошибка при валидации файла'],
+        warnings: []
       });
     }
   }, [onFileValidated, simulateUploadProgress]);

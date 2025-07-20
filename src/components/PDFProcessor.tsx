@@ -5,25 +5,25 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RotateCcw, Download, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { PDFValidationResult } from '@/types/pdf';
+import type { PdfValidationResult } from '@/types/pdf';
 
 export const PDFProcessor: React.FC = () => {
-  const [validationResult, setValidationResult] = useState<PDFValidationResult | null>(null);
+  const [validationResult, setValidationResult] = useState<PdfValidationResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
 
-  const handleFileValidated = (result: PDFValidationResult) => {
+  const handleFileValidated = (result: PdfValidationResult) => {
     setValidationResult(result);
     
     if (result.isValid) {
       toast({
         title: "Файл успешно проверен",
-        description: `PDF файл "${result.fileName}" готов к обработке`,
+        description: `PDF файл "${result.fileInfo.name}" готов к обработке`,
       });
     } else {
       toast({
         title: "Ошибка валидации",
-        description: result.error || "Не удалось обработать файл",
+        description: result.errors[0] || "Не удалось обработать файл",
         variant: "destructive",
       });
     }
