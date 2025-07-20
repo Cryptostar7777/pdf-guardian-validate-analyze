@@ -86,14 +86,19 @@ export const PDFProcessor: React.FC = () => {
               type="file" 
               accept=".pdf" 
               onChange={async (e) => {
+                console.log('🔥 EVENT onChange сработал!');
+                console.log('🔥 e.target.files:', e.target.files);
                 console.log('🔥 ПРОСТОЙ INPUT - файл выбран:', e.target.files?.[0]);
                 const file = e.target.files?.[0];
                 if (file) {
-                  console.log('🔥 Файл:', file.name, file.type, file.size);
+                  console.log('🔥 Файл найден:', file.name, file.type, file.size);
+                  console.log('🔥 Начинаем импорт PdfAnalyzer...');
                   
                   try {
                     // Импортируем PdfAnalyzer
+                    console.log('🔥 Пытаемся импортировать...');
                     const { PdfAnalyzer } = await import('@/utils/pdfAnalyzer');
+                    console.log('🔥 PdfAnalyzer импортирован успешно!');
                     console.log('🔥 Начинаем настоящий анализ...');
                     
                     const result = await PdfAnalyzer.validatePdfFile(file);

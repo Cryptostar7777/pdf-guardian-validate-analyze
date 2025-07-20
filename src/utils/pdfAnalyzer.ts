@@ -22,6 +22,7 @@ export class PdfAnalyzer {
     file: File, 
     config: Partial<ValidationConfig> = {}
   ): Promise<PdfValidationResult> {
+    console.log('🔥 PdfAnalyzer.validatePdfFile запущен с файлом:', file.name);
     const validationConfig = { ...DEFAULT_CONFIG, ...config };
     const errors: string[] = [];
     const warnings: string[] = [];
@@ -56,7 +57,9 @@ export class PdfAnalyzer {
     }
 
     try {
+      console.log('🔥 Начинаем парсинг PDF с помощью PDF.js...');
       const arrayBuffer = await file.arrayBuffer();
+      console.log('🔥 ArrayBuffer получен, размер:', arrayBuffer.byteLength);
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       
       fileInfo.pageCount = pdf.numPages;
