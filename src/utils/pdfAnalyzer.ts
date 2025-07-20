@@ -6,8 +6,14 @@ import type {
   PdfAnalysisResult 
 } from '@/types/pdf';
 
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Configure PDF.js worker - пробуем несколько вариантов
+try {
+  // Вариант 1: CDN
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+  console.log('🔥 PDF.js worker настроен через CDN:', pdfjsLib.GlobalWorkerOptions.workerSrc);
+} catch (error) {
+  console.error('❌ Ошибка настройки PDF.js worker:', error);
+}
 
 const DEFAULT_CONFIG: ValidationConfig = {
   maxFileSize: 50 * 1024 * 1024, // 50MB

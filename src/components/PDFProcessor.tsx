@@ -101,7 +101,14 @@ export const PDFProcessor: React.FC = () => {
                     console.log('🔥 PdfAnalyzer импортирован успешно!');
                     console.log('🔥 Начинаем настоящий анализ...');
                     
-                    const result = await PdfAnalyzer.validatePdfFile(file);
+                    // Добавляем timeout для диагностики
+                    const timeoutPromise = new Promise((_, reject) => {
+                      setTimeout(() => reject(new Error('Timeout: анализ занял больше 10 секунд')), 10000);
+                    });
+                    
+                    const analysisPromise = PdfAnalyzer.validatePdfFile(file);
+                    
+                    const result = await Promise.race([analysisPromise, timeoutPromise]) as PdfValidationResult;
                     console.log('🔥 Результат анализа:', result);
                     
                     handleFileValidated(result);
