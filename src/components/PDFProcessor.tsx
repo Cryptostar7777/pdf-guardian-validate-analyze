@@ -85,27 +85,38 @@ export const PDFProcessor: React.FC = () => {
             <input 
               type="file" 
               accept=".pdf" 
-              onChange={(e) => {
+              onChange={async (e) => {
                 console.log('🔥 ПРОСТОЙ INPUT - файл выбран:', e.target.files?.[0]);
                 const file = e.target.files?.[0];
                 if (file) {
                   console.log('🔥 Файл:', file.name, file.type, file.size);
-                  // Попробуем простой вызов
-                  handleFileValidated({
-                    isValid: true,
-                    fileInfo: {
-                      name: file.name,
-                      size: file.size,
-                      type: file.type,
-                      lastModified: file.lastModified,
-                      pageCount: 1
-                    },
-                    pdfType: 'text',
-                    complexity: 'low',
-                    estimatedProcessingTime: 5,
-                    errors: [],
-                    warnings: []
-                  });
+                  
+                  try {
+                    // Импортируем PdfAnalyzer
+                    const { PdfAnalyzer } = await import('@/utils/pdfAnalyzer');
+                    console.log('🔥 Начинаем настоящий анализ...');
+                    
+                    const result = await PdfAnalyzer.validatePdfFile(file);
+                    console.log('🔥 Результат анализа:', result);
+                    
+                    handleFileValidated(result);
+                  } catch (error) {
+                    console.error('🔥 Ошибка анализа:', error);
+                    handleFileValidated({
+                      isValid: false,
+                      fileInfo: {
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        lastModified: file.lastModified
+                      },
+                      pdfType: 'unknown',
+                      complexity: 'low',
+                      estimatedProcessingTime: 0,
+                      errors: [`Ошибка анализа: ${error}`],
+                      warnings: []
+                    });
+                  }
                 }
               }}
             />
