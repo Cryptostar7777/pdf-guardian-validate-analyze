@@ -96,9 +96,13 @@ export const PDFUploadZone: React.FC<PDFUploadZoneProps> = ({
     }
   }, [onFileValidated, simulateUploadProgress]);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    console.log('🔵 Файлы загружены:', acceptedFiles);
+  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: any[]) => {
+    console.log('🔵 onDrop вызван!');
+    console.log('✅ Принятые файлы:', acceptedFiles);
+    console.log('❌ Отклоненные файлы:', rejectedFiles);
+    
     if (acceptedFiles.length > 0) {
+      console.log('🔵 Начинаем обработку файла:', acceptedFiles[0].name);
       handleFileValidation(acceptedFiles[0]);
     }
   }, [handleFileValidation]);
@@ -115,7 +119,9 @@ export const PDFUploadZone: React.FC<PDFUploadZoneProps> = ({
       'application/pdf': ['.pdf']
     },
     multiple: false,
-    disabled: isValidating
+    disabled: isValidating,
+    onDropAccepted: (files) => console.log('🟢 Файлы приняты dropzone:', files),
+    onDropRejected: (rejections) => console.log('🔴 Файлы отклонены dropzone:', rejections)
   });
 
   const getStatusIcon = () => {

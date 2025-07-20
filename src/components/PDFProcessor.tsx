@@ -61,6 +61,11 @@ export const PDFProcessor: React.FC = () => {
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
+      {/* Debug info */}
+      <div className="bg-blue-50 p-4 rounded-lg text-sm text-blue-800">
+        <strong>Debug:</strong> Компонент PDFProcessor загружен. validationResult: {validationResult ? 'есть' : 'нет'}
+      </div>
+
       {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
