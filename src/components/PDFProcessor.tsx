@@ -78,10 +78,44 @@ export const PDFProcessor: React.FC = () => {
 
       {/* Upload Zone */}
       {!validationResult && (
-        <PDFUploadZone
-          onFileValidated={handleFileValidated}
-          className="max-w-2xl mx-auto"
-        />
+        <div className="space-y-4">
+          {/* Простой тест */}
+          <div className="bg-yellow-100 p-4 rounded border">
+            <h3>ТЕСТ: Простая загрузка файла</h3>
+            <input 
+              type="file" 
+              accept=".pdf" 
+              onChange={(e) => {
+                console.log('🔥 ПРОСТОЙ INPUT - файл выбран:', e.target.files?.[0]);
+                const file = e.target.files?.[0];
+                if (file) {
+                  console.log('🔥 Файл:', file.name, file.type, file.size);
+                  // Попробуем простой вызов
+                  handleFileValidated({
+                    isValid: true,
+                    fileInfo: {
+                      name: file.name,
+                      size: file.size,
+                      type: file.type,
+                      lastModified: file.lastModified,
+                      pageCount: 1
+                    },
+                    pdfType: 'text',
+                    complexity: 'low',
+                    estimatedProcessingTime: 5,
+                    errors: [],
+                    warnings: []
+                  });
+                }
+              }}
+            />
+          </div>
+          
+          <PDFUploadZone
+            onFileValidated={handleFileValidated}
+            className="max-w-2xl mx-auto"
+          />
+        </div>
       )}
 
       {/* Validation Result */}
