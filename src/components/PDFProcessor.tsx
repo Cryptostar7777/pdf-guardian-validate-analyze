@@ -13,6 +13,7 @@ export const PDFProcessor: React.FC = () => {
   const { toast } = useToast();
 
   const handleFileValidated = (result: PdfValidationResult) => {
+    console.log('🟢 Файл валидирован в PDFProcessor:', result);
     setValidationResult(result);
     
     if (result.isValid) {

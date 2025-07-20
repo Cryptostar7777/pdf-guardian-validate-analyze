@@ -44,6 +44,7 @@ export const PDFUploadZone: React.FC<PDFUploadZoneProps> = ({
   }, [onUploadProgress]);
 
   const handleFileValidation = useCallback(async (file: File) => {
+    console.log('🔵 Начинаем валидацию файла:', file.name);
     setCurrentFile(file);
     setIsValidating(true);
     setValidationProgress(0);
@@ -55,7 +56,9 @@ export const PDFUploadZone: React.FC<PDFUploadZoneProps> = ({
       // Add some delay to show progress
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      console.log('🔵 Вызываем PdfAnalyzer.validatePdfFile...');
       const result = await PdfAnalyzer.validatePdfFile(file);
+      console.log('🟢 Результат валидации:', result);
       
       // Ensure progress reaches 100%
       setValidationProgress(100);
@@ -70,6 +73,7 @@ export const PDFUploadZone: React.FC<PDFUploadZoneProps> = ({
       }, 500);
       
     } catch (error) {
+      console.error('❌ Ошибка при валидации:', error);
       clearProgress();
       setIsValidating(false);
       setCurrentFile(null);
@@ -86,13 +90,14 @@ export const PDFUploadZone: React.FC<PDFUploadZoneProps> = ({
         pdfType: 'unknown',
         estimatedProcessingTime: 0,
         complexity: 'low',
-        errors: ['Произошла ошибка при валидации файла'],
+        errors: [`Произошла ошибка при валидации файла: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`],
         warnings: []
       });
     }
   }, [onFileValidated, simulateUploadProgress]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
+    console.log('🔵 Файлы загружены:', acceptedFiles);
     if (acceptedFiles.length > 0) {
       handleFileValidation(acceptedFiles[0]);
     }
