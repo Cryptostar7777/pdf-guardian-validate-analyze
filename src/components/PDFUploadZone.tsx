@@ -116,12 +116,25 @@ export const PDFUploadZone: React.FC<PDFUploadZoneProps> = ({
   } = useDropzone({
     onDrop,
     accept: {
-      'application/pdf': ['.pdf']
+      'application/pdf': ['.pdf'],
+      'application/x-pdf': ['.pdf'],
+      'text/pdf': ['.pdf']
     },
     multiple: false,
     disabled: isValidating,
-    onDropAccepted: (files) => console.log('🟢 Файлы приняты dropzone:', files),
-    onDropRejected: (rejections) => console.log('🔴 Файлы отклонены dropzone:', rejections)
+    onDropAccepted: (files) => {
+      console.log('🟢 Файлы приняты dropzone:', files);
+    },
+    onDropRejected: (rejections) => {
+      console.log('🔴 Файлы отклонены dropzone:', rejections);
+      console.log('🔴 Причины отклонения:', rejections.map(r => r.errors));
+    },
+    onFileDialogCancel: () => {
+      console.log('🟡 Диалог отменен пользователем');
+    },
+    onError: (error) => {
+      console.error('❌ Ошибка dropzone:', error);
+    }
   });
 
   const getStatusIcon = () => {
@@ -192,13 +205,22 @@ export const PDFUploadZone: React.FC<PDFUploadZoneProps> = ({
         )}
         
         {!isDragActive && !isValidating && (
-          <Button 
-            variant="outline" 
-            onClick={open}
-            className="mt-2"
-          >
-            Выбрать файл
-          </Button>
+          <div className="space-y-2">
+            <Button 
+              variant="outline" 
+              onClick={(e) => {
+                console.log('🔵 Кнопка "Выбрать файл" нажата');
+                e.preventDefault();
+                open();
+              }}
+              className="mt-2"
+            >
+              Выбрать файл
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Нажмите для выбора PDF файла
+            </p>
+          </div>
         )}
       </div>
     </div>
